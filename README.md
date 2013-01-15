@@ -8,7 +8,6 @@ See http://www.cafjs.com
 
 This repository contains a client CAF lib for node.js
 
-
 ## API
 
     lib/Session.js
