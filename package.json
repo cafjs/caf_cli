@@ -1,10 +1,10 @@
 {
     "name": "caf_cli",
     "description": "Cloud Assistants lib for interacting as a client of other CA",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "author": "Antonio Lain <antlai@cafjs.com>",
     "dependencies": {
-        "caf_core" : ">= 0.0.1",
+        "caf_core" : ">= 0.0.5",
         "request" : ">= 2.9.202"
     },
     "main": "index",
