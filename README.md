@@ -6,7 +6,7 @@ See http://www.cafjs.com
 
 ## CAF Client Lib for node.js
 
-This repository contains a client CAF lib for node.js
+This repository contains a client CAF lib for browser and node.js
 
 ## API
 

@@ -1,17 +1,26 @@
 {
     "name": "caf_cli",
-    "description": "Cloud Assistants lib for interacting as a client of other CA",
-    "version": "0.1.0",
+    "description": "Cloud Assistants browser and node.js client library for interacting with CAs",
+    "version": "0.2.0",
     "author": "Antonio Lain <antlai@cafjs.com>",
     "dependencies": {
-        "caf_core" : "^0.1",
-        "request" : ">= 2.9.202"
+        "caf_transport" : "^0.2.0",
+        "ws" : "^0.6.0"
+    },
+    "devDependencies": {
+        "nodeunit" : ">=0.9",
+        "caf_platform": "^0.2.0",
+        "caf_ca": "^0.2.0",
+        "caf_components": "^0.2.0"
     },
     "main": "index",
     "homepage": "http://www.cafjs.com",
+    "scripts": {
+        "test": "node ./node_modules/.bin/nodeunit"
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/cafjs/caf_cli.git"
     },
-  "engines": { "node": ">= 0.8.1 " }
+  "engines": { "node": ">= 0.10.29 " }
 }
