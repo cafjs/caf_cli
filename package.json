@@ -11,7 +11,8 @@
         "nodeunit" : ">=0.9",
         "caf_platform": "^0.2.0",
         "caf_ca": "^0.2.0",
-        "caf_components": "^0.2.0"
+        "caf_components": "^0.2.0",
+        "async" : ">=0.1.9"
     },
     "main": "index",
     "homepage": "http://www.cafjs.com",
