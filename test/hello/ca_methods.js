@@ -39,12 +39,14 @@ exports.methods = {
     helloFail: function(msg, cb) {
         this.state.lastMsg = msg;
         var err = new Error('Something bad happened');
+        err.msg = 'helloFail';
         cb(err);
     },
     helloException: function(msg, cb) {
         this.state.lastMsg = msg;
         var f = function() {
             var err = new Error('Something really bad happened');
+            err.msg = 'helloException';
             throw err;
         };
         f();
@@ -53,6 +55,7 @@ exports.methods = {
         this.state.lastMsg = msg;
         var f = function() {
             var err = new Error('Something really bad happened');
+            err.msg = 'helloDelayException';
             throw err;
         };
         setTimeout(f, 100);
