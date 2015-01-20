@@ -28,8 +28,15 @@ exports.methods = {
         cb(null);
     },
     "__ca_pulse__" : function(cb) {
+        var self = this;
         this.state.pulses = this.state.pulses + 1;
         this.$.log.debug('<<< Calling Pulse>>>' + this.state.pulses);
+        if (this.state.notify) {
+            this.state.notify.forEach(function(x) {
+                                          self.$.session.notify(x);
+                                      });
+            this.state.notify = [];
+        }
         cb(null);
     },
     hello: function(msg, cb) {
@@ -59,6 +66,11 @@ exports.methods = {
             throw err;
         };
         setTimeout(f, 100);
+    },
+    helloNotify: function(msg, cb) {
+        this.state.notify = this.state.notify || [];
+        this.state.notify.push(['helloNotify:'+msg]);
+        cb(null);
     },
     getLastMessage: function(cb) {
         cb(null, this.state.lastMsg);

@@ -10,6 +10,13 @@ var app = hello;
 var HOST='localhost';
 var PORT=3000;
 
+process.on('uncaughtException', function (err) {
+               console.log("Uncaught Exception: " + err);
+               console.log(myUtils.errToPrettyStr(err));
+               process.exit(1);
+
+});
+
 module.exports = {
     setUp: function (cb) {
         var self = this;
@@ -163,6 +170,132 @@ module.exports = {
                             test.ifError(err);
                             test.done();
                         });
+    },
+    helloRetry: function(test) {
+        var self = this;
+        test.expect(17);
+        var s;
+        var sendHello = function(cb) {
+            var cb0 =  function(err, res) {
+                test.ok(!err);
+                test.equals(res, 'Bye:foo2');
+                cb(err, res);
+            };
+            s.hello('foo2', cb0);
+        };
+        var restart = function(cb) {
+            app.load(null, {name: 'top'}, 'framework.json', null,
+                     function(err, $) {
+                         test.ifError(err);
+                         self.$ = $;
+                         cb(err, $);
+                     });
+        };
+        async.series([
+                         function(cb) {
+                             s = new cli.Session('ws://localhost:3000',
+                                                 'antonio-c1',
+                                                {
+                                                    timeoutMsec : 12000
+                                                });
+                             s.onopen = function() {
+                                 s.hello('foo', cb);
+                             };
+                         },
+                         function(cb) {
+                             self.$.top.__ca_graceful_shutdown__(null, cb);
+                         },
+                         function(cb) {
+                             async.parallel([
+                                                sendHello,
+                                                sendHello,
+                                                sendHello,
+                                                sendHello,
+                                                sendHello,
+                                                function(cb0) {
+                                                    var f = function() {
+                                                        var n = s.numPending();
+                                                        test.equals(n, 6);
+                                                        restart(cb0);
+                                                    };
+                                                    setTimeout(f, 5000);
+                                                }
+                                            ], cb);
+                         },
+                         function(cb) {
+                             self.$.top.__ca_graceful_shutdown__(null, cb);
+                         },
+                         function(cb) {
+                             s.onclose = function(err) {
+                                 test.ok(err && err.timeout);
+                                 console.log(err);
+                                 cb(null);
+                             };
+                         },
+                         restart,
+                         function(cb) {
+                             s = new cli.Session('ws://localhost:3000',
+                                                 'antonio-c1',
+                                                 {
+                                                     maxRetries : 5
+                                                 });
+                             s.onopen = function() {
+                                 self.$.top.__ca_graceful_shutdown__(null, cb);
+                             };
+                         },
+                         function(cb) {
+                             s.onclose = function(err) {
+                                 test.ok(err && err.maxRetriesExceeded);
+                                 console.log(err);
+                                 cb(null);
+                             };
+                             s.hello('foo2', function(err, data) {
+                                         console.log('never called');
+                                     });
+                         },
+                         restart
+                     ], function(err, res) {
+                         test.ifError(err);
+                         test.done();
+                     });
+    },
+    helloNotify: function(test) {
+        var self = this;
+        test.expect(5);
+        var s;
+        var sendHelloNotify = function(cb) {
+            var cb0 =  function(err, res) {
+                test.ok(!err);
+                cb(err, res);
+            };
+            s.helloNotify('foo2', cb0);
+        };
+        async.series([
+                         function(cb) {
+                             s = new cli.Session('ws://localhost:3000',
+                                                 'antonio-c1');
+                             s.onopen = function() {
+                                 sendHelloNotify(cb);
+                             };
+                         },
+                         function(cb) {
+                             s.onmessage = function(msg) {
+                                 test.ok(json_rpc.isNotification(msg));
+                                 var data = json_rpc.getMethodArgs(msg);
+                                 test.deepEqual(data[0], 'helloNotify:foo2');
+                                 cb(null);
+                             };
+                         },
+                         function(cb) {
+                             s.onclose = function(err) {
+                                 test.ok(!err);
+                                 cb(null, null);
+                             };
+                             s.close();
+                         }
+                     ], function(err, res) {
+                         test.ifError(err);
+                         test.done();
+                     });
     }
-
 };
