@@ -10,7 +10,7 @@
         {
             "name": "lease",
             "env" : {
-                "leaseTimeout": 60
+                "leaseTimeout": 8
             }
         }
     ]

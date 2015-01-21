@@ -1,0 +1,7 @@
+#local
+iptables -t nat -A OUTPUT -o lo  -p tcp --dport 4000 -j REDIRECT --to-port 3000
+iptables -t nat -A OUTPUT -o lo  -p tcp --dport 4001 -j REDIRECT --to-port 3001
+
+#remote port forwarder
+#iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 4000 -j DNAT --to 192.1.1.2:3000
+#iptables -A FORWARD -p tcp -d 192.1.1.2 --dport 3000 -j ACCEPT
