@@ -42,22 +42,22 @@ module.exports = {
     },
     hello: function(test) {
         var self = this;
-        test.expect(6);
+        test.expect(7);
         var s;
         async.waterfall([
                             function(cb) {
                                 s = new cli.Session('ws://localhost:3000',
                                                     'antonio-c1');
-                                test.throws(function() {
-                                                s.helllllooo('foo',cb);
-                                            }, Error, 'bad method name');
-                                test.throws(function() {
-                                                s.hello('foo','bar', cb);
-                                            }, Error, 'bad # args');
-                                test.throws(function() {
-                                                s.hello('foo','bar');
-                                            }, Error, 'no callback');
                                 s.onopen = function() {
+                                    test.throws(function() {
+                                                    s.helllllooo('foo',cb);
+                                                }, Error, 'bad method name');
+                                    test.throws(function() {
+                                                    s.hello('foo','bar', cb);
+                                                }, Error, 'bad # args');
+                                    test.throws(function() {
+                                                    s.hello('foo','bar');
+                                                }, Error, 'no callback');
                                     s.hello('foo', cb);
                                 };
                             },
@@ -65,6 +65,7 @@ module.exports = {
                                 test.equals(res, 'Bye:foo');
                                 s.onclose = function(err) {
                                     test.ok(!err);
+                                    test.ok(s.isClosed());
                                     cb(null, null);
                                 };
                                 s.close();
@@ -284,6 +285,43 @@ module.exports = {
                                  var data = json_rpc.getMethodArgs(msg);
                                  test.deepEqual(data[0], 'helloNotify:foo2');
                                  cb(null);
+                             };
+                         },
+                         function(cb) {
+                             setTimeout(function() { cb(null);}, 10000);
+//                             s.hello('foo2', cb);
+                         },
+                         function(cb) {
+                             s.onclose = function(err) {
+                                 test.ok(!err);
+                                 cb(null, null);
+                             };
+                             s.close();
+                         }
+                     ], function(err, res) {
+                         test.ifError(err);
+                         test.done();
+                     });
+    },
+    recoverableException: function(test) {
+        var self = this;
+        test.expect(4);
+        var s;
+        var sendFailPrepareAlt = function(cb) {
+            var cb0 =  function(err, res) {
+                test.ok(!err);
+                test.equals('Bye:foo2', res);
+                cb(err, res);
+            };
+            s.failPrepareAlt('foo2', cb0);
+        };
+
+        async.series([
+                         function(cb) {
+                             s = new cli.Session('ws://localhost:3000',
+                                                 'antonio-c1');
+                             s.onopen = function() {
+                                 sendFailPrepareAlt(cb);
                              };
                          },
                          function(cb) {

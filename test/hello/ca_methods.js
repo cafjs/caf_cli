@@ -72,6 +72,26 @@ exports.methods = {
         this.state.notify.push(['helloNotify:'+msg]);
         cb(null);
     },
+    failPrepareAlt: function(msg, cb) {
+        /* 'scratch' is non-transactional, non-persistent.
+         *
+         *  The following works because there is no CA shutdown between calls.
+         *
+         * Using 'state' does not work because the exception rolls-back changes,
+         * and it always fails...
+         */
+        if (!this.scratch[msg]) {
+            // fail
+            var p = {};
+            p.x = p; // circular, non-serializable, fails in prepare
+            this.state.p = p;
+            this.scratch[msg] = true;
+        } else {
+            // no failure
+            this.scratch[msg] = false;
+        }
+        cb(null, 'Bye:' + msg);
+    },
     getLastMessage: function(cb) {
         cb(null, this.state.lastMsg);
     },
