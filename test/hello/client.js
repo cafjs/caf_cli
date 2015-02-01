@@ -1,5 +1,8 @@
 var cli = require('../../index.js');
-var s = new cli.Session('ws://foo.vcap.me:4000', 'antonio-c2');
+var CA_NAME = process.env['CA_NAME'] || 'antonio-c2';
+var WS_URL = process.env['WS_URL'] || 'ws://foo.vcap.me';
+console.log('ca: '+ CA_NAME + ' ' + WS_URL);
+var s = new cli.Session(WS_URL, CA_NAME);
 var MAX_HELLOS = 100;
 
 s.onclose = function(err) {
