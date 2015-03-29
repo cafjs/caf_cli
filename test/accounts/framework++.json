@@ -1,0 +1,34 @@
+{
+    "name": "top",
+    "components": [
+        {
+            "name": "log"
+        },
+        {
+            "name": "security",
+            "module": "caf_security#plug",
+            "description": "Authenticates requests\n Properties: <keysDir> Directory with key material, defaults to colocated with ca_methods.js (i.e., <app_root>/lib). \n <trustedPubKeyFile> Trusted public key to verify signed tokens. \n <privateKeyFile> Optional private key to sign tokens. \n <pubKeyFile> Optional public key for signing key. \n <appPublisher> Name of the app publisher.\n <appLocalName> Local name app given by the app publisher.\n <allowNobodyUser> Enable the user 'nobody' to bypass authentication",
+            "env" : {
+                "keysDir": null,
+                "trustedPubKeyFile" : "rsa_pub.pem",
+                "privateKeyFile": "rsa_priv.pem",
+                "publicKeyFile" : "rsa_pub.pem",
+                "appPublisher" : "F1CD0B760DCEE7DE770249F4512A9D0A",
+                "appLocalName" : "accounts",
+                "allowNobodyUser" : true
+            }
+        },
+        {
+            "name": "paas",
+            "env" : {
+                "port": 3001
+            }
+        },
+        {
+            "name": "cron_security",
+            "env" : {
+                "interval": 5000
+            }
+        }
+    ]
+}

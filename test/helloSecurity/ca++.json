@@ -1,0 +1,33 @@
+{
+    "name" : "ca",
+    "components" : [
+        {
+            "module": "caf_security#plug_ca",
+            "name": "security",
+            "description": "Manages authorization checks for this CA.",
+            "env" : {
+                "maxRetries" : "$._.env.maxRetries",
+                "retryDelay" : "$._.env.retryDelay",
+                "defaultRules" : [
+                    {
+                        "type" : "caf.simpleRule",
+                        "ac" : {
+                            "caOwner" : "!SELF",
+                            "caLocalName" : "!CA_LOCAL"
+                        }
+                    }
+                ]
+            },
+            "components" : [
+                {
+                    "module": "caf_security#proxy",
+                    "name": "proxy",
+                    "description": "Provides authorization management API.",
+                    "env" : {
+
+                    }
+                }
+            ]
+        }
+    ]
+}

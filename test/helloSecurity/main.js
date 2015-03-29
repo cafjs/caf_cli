@@ -5,3 +5,4 @@ exports.load = function($, spec, name, modules, cb) {
     modules.push(module);
     caf_core.init(modules, spec, name, cb);
 };
+
