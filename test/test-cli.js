@@ -7,7 +7,7 @@ var hello = require('./hello/main.js');
 
 var app = hello;
 
-var HOST='localhost';
+var HOST='root-test.vcap.me';
 var PORT=3000;
 
 process.on('uncaughtException', function (err) {
@@ -46,7 +46,7 @@ module.exports = {
         var s;
         async.waterfall([
                             function(cb) {
-                                s = new cli.Session('ws://localhost:3000',
+                                s = new cli.Session('ws://root-test.vcap.me:3000',
                                                     'antonio-c1');
                                 s.onopen = function() {
                                     test.throws(function() {
@@ -82,7 +82,7 @@ module.exports = {
         var s;
         async.waterfall([
                             function(cb) {
-                                s = new cli.Session('ws://localhost:3000',
+                                s = new cli.Session('ws://root-test.vcap.me:3000',
                                                     'antonio-c1');
                                 s.onopen = function() {
                                     var cb0 = function(err, val) {
@@ -113,7 +113,7 @@ module.exports = {
         var s;
         async.series([
                          function(cb) {
-                             s = new cli.Session('ws://localhost:3000',
+                             s = new cli.Session('ws://root-test.vcap.me:3000',
                                                  'antonio-c1');
                              s.onopen = function() {
                                  var cb0 = function(err, val) {
@@ -140,7 +140,7 @@ module.exports = {
                              };
                          },
                          function(cb) {
-                             s = new cli.Session('ws://localhost:3000',
+                             s = new cli.Session('ws://root-test.vcap.me:3000',
                                                  'antonio-c1');
                              s.onopen = function() {
                                  var cb0 = function(err, val) {
@@ -194,7 +194,7 @@ module.exports = {
         };
         async.series([
                          function(cb) {
-                             s = new cli.Session('ws://localhost:3000',
+                             s = new cli.Session('ws://root-test.vcap.me:3000',
                                                  'antonio-c1',
                                                 {
                                                     timeoutMsec : 12000
@@ -235,7 +235,7 @@ module.exports = {
                          },
                          restart,
                          function(cb) {
-                             s = new cli.Session('ws://localhost:3000',
+                             s = new cli.Session('ws://root-test.vcap.me:3000',
                                                  'antonio-c1',
                                                  {
                                                      maxRetries : 5
@@ -273,7 +273,7 @@ module.exports = {
         };
         async.series([
                          function(cb) {
-                             s = new cli.Session('ws://localhost:3000',
+                             s = new cli.Session('ws://root-test.vcap.me:3000',
                                                  'antonio-c1');
                              s.onopen = function() {
                                  sendHelloNotify(cb);
@@ -318,7 +318,7 @@ module.exports = {
 
         async.series([
                          function(cb) {
-                             s = new cli.Session('ws://localhost:3000',
+                             s = new cli.Session('ws://root-test.vcap.me:3000',
                                                  'antonio-c1');
                              s.onopen = function() {
                                  sendFailPrepareAlt(cb);
