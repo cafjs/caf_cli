@@ -1,11 +1,20 @@
 {
     "name": "top",
+    "env" : {
+        "appPublisher" :"root",
+        "appLocalName" : "test",
+        "appSuffix" : "vcap.me"
+    },
     "components": [
         {
             "name": "log",
             "env" : {
                 "logLevel" : "DEBUG"
             }
+        },
+        {
+            "name": "security",
+            "module" : null
         },
         {
             "name": "lease",

@@ -1,5 +1,10 @@
 {
     "name": "top",
+    "env" : {
+        "appPublisher" :"F1CD0B760DCEE7DE770249F4512A9D0A",
+        "appLocalName" : "accounts",
+        "appSuffix" : "vcap.me"
+    },
     "components": [
         {
             "name": "log"
@@ -13,8 +18,6 @@
                 "trustedPubKeyFile" : "rsa_pub.pem",
                 "privateKeyFile": "rsa_priv.pem",
                 "publicKeyFile" : "rsa_pub.pem",
-                "appPublisher" : "F1CD0B760DCEE7DE770249F4512A9D0A",
-                "appLocalName" : "accounts",
                 "allowNobodyUser" : true
             }
         },

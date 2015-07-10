@@ -1,5 +1,10 @@
 {
     "name": "top",
+    "env" : {
+        "appPublisher" :"F1CD0B760DCEE7DE770249F4512A9D0A",
+        "appLocalName" : "helloworld",
+        "appSuffix" : "vcap.me"
+    },
     "components": [
         {
             "name": "log"
@@ -13,8 +18,6 @@
                 "trustedPubKeyFile" : "rsa_pub.pem",
                 "privateKeyFile": null,
                 "publicKeyFile" : null,
-                "appPublisher" : "F1CD0B760DCEE7DE770249F4512A9D0A",
-                "appLocalName" : "helloworld",
                 "allowNobodyUser" : false,
                 "accountsURL": "http://xx-accounts.vcap.me:3001"
             }
