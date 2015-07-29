@@ -76,6 +76,28 @@ module.exports = {
                          test.done();
                      });
     },
+    helloAdjustTime : function(test) {
+        var self = this;
+        test.expect(2);
+        var s;
+        async.series([
+            function(cb) {
+                s = new cli.Session('ws://root-test.vcap.me:3000',
+                                    'antonio-c1');
+                s.onopen = function() {
+                    async.timesSeries(20, function(n, cb0) {
+                         s.hello('foo', cb0);
+                    }, cb);
+                };
+            }
+        ],function(err, res) {
+            test.ifError(err);
+            var offset = s.getEstimatedTimeOffset();
+            console.log(offset);
+            test.ok(offset < 10);
+            test.done();
+        });
+    },
     helloFail: function(test) {
         var self = this;
         test.expect(5);
