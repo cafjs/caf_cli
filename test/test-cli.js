@@ -20,7 +20,7 @@ process.on('uncaughtException', function (err) {
 module.exports = {
     setUp: function (cb) {
         var self = this;
-        app.load(null, {name: 'top'}, 'framework.json', null,
+        app.init({name: 'top'}, 'framework.json', null,
                       function(err, $) {
                           if (err) {
                               console.log('setUP Error' + err);
@@ -207,7 +207,7 @@ module.exports = {
             s.hello('foo2', cb0);
         };
         var restart = function(cb) {
-            app.load(null, {name: 'top'}, 'framework.json', null,
+            app.init({name: 'top'}, 'framework.json', null,
                      function(err, $) {
                          test.ifError(err);
                          self.$ = $;
