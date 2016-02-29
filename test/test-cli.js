@@ -40,6 +40,7 @@ module.exports = {
             this.$.top.__ca_graceful_shutdown__(null, cb);
         }
     },
+
     hello: function(test) {
         var self = this;
         test.expect(7);
@@ -78,12 +79,12 @@ module.exports = {
     },
     helloAdjustTime : function(test) {
         var self = this;
-        test.expect(2);
+        test.expect(4);
         var s;
         async.series([
             function(cb) {
                 s = new cli.Session('ws://root-test.vcap.me:3000',
-                                    'antonio-c1');
+                                    'antonio-c2');
                 s.onopen = function() {
                     async.timesSeries(20, function(n, cb0) {
                          s.hello('foo', cb0);
@@ -95,7 +96,13 @@ module.exports = {
             var offset = s.getEstimatedTimeOffset();
             console.log(offset);
             test.ok(offset < 10);
-            test.done();
+
+            s.onclose = function(err) {
+                test.ok(!err);
+                test.ok(s.isClosed());
+                test.done();
+            };            
+            s.close();
         });
     },
     helloFail: function(test) {
@@ -105,7 +112,7 @@ module.exports = {
         async.waterfall([
                             function(cb) {
                                 s = new cli.Session('ws://root-test.vcap.me:3000',
-                                                    'antonio-c1');
+                                                    'antonio-c3');
                                 s.onopen = function() {
                                     var cb0 = function(err, val) {
                                         test.ok(err);
@@ -136,7 +143,7 @@ module.exports = {
         async.series([
                          function(cb) {
                              s = new cli.Session('ws://root-test.vcap.me:3000',
-                                                 'antonio-c1');
+                                                 'antonio-c4');
                              s.onopen = function() {
                                  var cb0 = function(err, val) {
                                      console.log('ERROR: This should never' +
@@ -163,7 +170,7 @@ module.exports = {
                          },
                          function(cb) {
                              s = new cli.Session('ws://root-test.vcap.me:3000',
-                                                 'antonio-c1');
+                                                 'antonio-c4');
                              s.onopen = function() {
                                  var cb0 = function(err, val) {
                                      console.log('ERROR: This should never' +
@@ -194,6 +201,7 @@ module.exports = {
                             test.done();
                         });
     },
+
     helloRetry: function(test) {
         var self = this;
         test.expect(17);
@@ -217,7 +225,7 @@ module.exports = {
         async.series([
                          function(cb) {
                              s = new cli.Session('ws://root-test.vcap.me:3000',
-                                                 'antonio-c1',
+                                                 'antonio-c9',
                                                 {
                                                     timeoutMsec : 12000
                                                 });
@@ -258,7 +266,7 @@ module.exports = {
                          restart,
                          function(cb) {
                              s = new cli.Session('ws://root-test.vcap.me:3000',
-                                                 'antonio-c1',
+                                                 'antonio-c9',
                                                  {
                                                      maxRetries : 5
                                                  });
@@ -296,7 +304,7 @@ module.exports = {
         async.series([
                          function(cb) {
                              s = new cli.Session('ws://root-test.vcap.me:3000',
-                                                 'antonio-c1');
+                                                 'antonio-c5');
                              s.onopen = function() {
                                  sendHelloNotify(cb);
                              };
@@ -341,7 +349,7 @@ module.exports = {
         async.series([
                          function(cb) {
                              s = new cli.Session('ws://root-test.vcap.me:3000',
-                                                 'antonio-c1');
+                                                 'antonio-c6');
                              s.onopen = function() {
                                  sendFailPrepareAlt(cb);
                              };
