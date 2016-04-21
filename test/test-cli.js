@@ -43,7 +43,7 @@ module.exports = {
 
     hello: function(test) {
         var self = this;
-        test.expect(7);
+        test.expect(6);
         var s;
         async.waterfall([
                             function(cb) {
@@ -56,9 +56,6 @@ module.exports = {
                                     test.throws(function() {
                                                     s.hello('foo','bar', cb);
                                                 }, Error, 'bad # args');
-                                    test.throws(function() {
-                                                    s.hello('foo','bar');
-                                                }, Error, 'no callback');
                                     s.hello('foo', cb);
                                 };
                             },
@@ -77,6 +74,65 @@ module.exports = {
                          test.done();
                      });
     },
+    helloMulti: function(test) {
+        var self = this;
+        test.expect(8);
+        var s;
+        async.waterfall([
+            function(cb) {
+                s = new cli.Session('ws://root-test.vcap.me:3000',
+                                    'antonio-c1');
+                s.onopen = function() {
+                    s.hello('foo')
+                        .hello('foo1')
+                        .hello('foo2')
+                        .hello('foo7')
+                        .hello('foo')
+                        .getLastMessage(cb);
+                };
+            },
+            function(res, cb) {
+                test.equals(res, 'foo');
+                s.hello('foo0')
+                    .helloFail('foo1')
+                    .hello('foo2', function(err) {
+                        test.ok(err);
+                        // nothing changed
+                        s.getLastMessage(cb);
+                    });
+            },
+            function(res, cb) {
+                test.equals(res, 'foo');
+                 s.hello('foo0')
+                    .helloDelayException('foo1')
+                    .hello('foo2', function(err) {
+                        test.ok(false); // never reached
+                        // nothing changed
+                        s.getLastMessage(cb);
+                    });
+                s.onclose = function(err) {
+                    test.ok(err);
+                    s = new cli.Session('ws://root-test.vcap.me:3000',
+                                        'antonio-c1');
+                    s.onopen = function() {
+                        s.getLastMessage(cb);
+                    };
+                };
+            },            
+            function(res, cb) {
+                test.equals(res, 'foo');
+                s.onclose = function(err) {
+                    test.ok(!err);
+                    test.ok(s.isClosed());
+                    cb(null, null);
+                };
+                s.close();
+            }
+        ], function(err, res) {
+            test.ifError(err);
+            test.done();
+        });
+    },    
     helloAdjustTime : function(test) {
         var self = this;
         test.expect(4);
