@@ -118,7 +118,7 @@ module.exports = {
                         s.getLastMessage(cb);
                     };
                 };
-            },            
+            },
             function(res, cb) {
                 test.equals(res, 'foo');
                 s.onclose = function(err) {
@@ -132,7 +132,7 @@ module.exports = {
             test.ifError(err);
             test.done();
         });
-    },    
+    },
     helloAdjustTime : function(test) {
         var self = this;
         test.expect(4);
@@ -157,7 +157,7 @@ module.exports = {
                 test.ok(!err);
                 test.ok(s.isClosed());
                 test.done();
-            };            
+            };
             s.close();
         });
     },
@@ -421,5 +421,62 @@ module.exports = {
                          test.ifError(err);
                          test.done();
                      });
+    },
+    diffie: function(test) {
+        var self = this;
+        var s1, s2;
+        test.expect(6);
+                async.series([
+                    function(cb) {
+                        s1 = new cli.Session('ws://root-test.vcap.me:3000',
+                                             'antonio-c16');
+                        s1.onopen = function() {
+                            cb(null);;
+                        };
+                    },
+                    function(cb) {
+                        s2 = new cli.Session('ws://root-test.vcap.me:3000',
+                                                 'antonio-c26');
+                        s2.onopen = function() {
+                            cb(null);;
+                        };
+                    },
+                    function(cb) {
+                        var c1 = s1.getCrypto();
+                        var c2 = s2.getCrypto();
+                        c2.setOtherPublicKey(c1.getPublicKey());
+                        c1.setOtherPublicKey(c2.getPublicKey());
+                        var m1 = c1.encryptAndMAC('Hello');
+                        var m2 = c2.authAndDecrypt(m1);
+                        test.equal(m2, 'Hello');
+                        m1 = c2.encryptAndMAC('Goodbye');
+                        m2 = c1.authAndDecrypt(m1);
+                        test.equal(m2, 'Goodbye');
+                        m1 = m1.slice(0, m1.length -2);
+                        test.throws(function() {
+                            // bad MAC
+                            m2 = c1.authAndDecrypt(m1);
+                        });
+                        cb(null);
+                    },
+                    function(cb) {
+                        s1.onclose = function(err) {
+                            test.ok(!err);
+                            cb(null, null);
+                        };
+                        s1.close();
+                    },
+                    function(cb) {
+                        s2.onclose = function(err) {
+                            test.ok(!err);
+                            cb(null, null);
+                        };
+                        s2.close();
+                    }
+                ], function(err, res) {
+                    test.ifError(err);
+                    test.done();
+                });
+
     }
 };

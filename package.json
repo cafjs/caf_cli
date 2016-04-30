@@ -1,7 +1,7 @@
 {
     "name": "caf_cli",
     "description": "Cloud Assistants browser and node.js client library for interacting with CAs",
-    "version": "0.2.33",
+    "version": "0.2.34",
     "author": "Antonio Lain <antlai@cafjs.com>",
     "dependencies": {
         "caf_transport" : "^0.2.0",
