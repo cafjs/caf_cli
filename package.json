@@ -8,6 +8,7 @@
         "ws" : "^1.0.1"
     },
     "devDependencies": {
+        "eslint": "^3.1.1",
 	"caf_components" : "^0.2.0",
         "caf_platform" : "^0.2.0",
         "caf_ca" : "^0.2.0",
@@ -22,6 +23,8 @@
     "homepage": "http://www.cafjs.com",
     "scripts": {
         "test": "node ./node_modules/.bin/nodeunit",
+        "eslint" : "./node_modules/.bin/eslint .",
+        "eslintfix" : "./node_modules/.bin/eslint --fix .",
         "build-js" : "browserify -r ./index.js:caf_cli -d -o public/caf_cli.js",
         "build-min-js" : "browserify -r ./index.js:caf_cli | uglifyjs > public/caf_cli.min.js",
         "build": "npm run build-js && npm run build-min-js"
