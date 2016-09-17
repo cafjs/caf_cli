@@ -43,7 +43,7 @@ module.exports = {
 
     hello: function(test) {
         var self = this;
-        test.expect(6);
+        test.expect(8);
         var s;
         async.waterfall([
                             function(cb) {
@@ -61,6 +61,10 @@ module.exports = {
                             },
                             function(res, cb) {
                                 test.equals(res, 'Bye:foo');
+                                var old = s.changeSessionId('newSession');
+                                test.equals(old, 'default');
+                                old = s.changeSessionId('newSession');
+                                test.equals(old, 'newSession');
                                 s.onclose = function(err) {
                                     test.ok(!err);
                                     test.ok(s.isClosed());
