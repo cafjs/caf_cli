@@ -1,0 +1,14 @@
+{
+    "name": "top",
+    "env" : {
+        "appPublisher" :"root",
+        "appLocalName" : "hellonotif",
+        "appSuffix" : "vcap.me"
+    },
+    "components": [
+        {
+            "name": "security",
+            "module" : null
+        }
+    ]
+}
