@@ -11,7 +11,7 @@ See http://www.cafjs.com
 
 This repository contains a client CAF library for browser (using `browserify` and native websockets), cloud, scripting, and gadget (`node.js`).
 
-The base interface is very similar to a websocket, but CAF dynamically adds methods for remote invocation with local argument checking.
+The base interface is very similar to a websocket, but CAF dynamically adds remote invocation methods with local argument checking.
 
 For example, with the CA:
 
@@ -71,6 +71,8 @@ the methods `increment` and `decrement` magically appear in `s` after we open th
 
 Remote invocations are always serialized. The session locally buffers new requests until the previous ones have been processed. Session properties can be configured in the URL, or in a separate constructor argument. See {@link module:caf_cli/Session} for details.
 
+### Errors
+
 There are two types of errors:
 
 * Application error: propagated in the callback, no attempt to recover it.
@@ -81,7 +83,9 @@ Calling the `onclose` with no argument means the session closed normally, i.e., 
 
 Note that the `onerror` handler in the websocket interface is for *internal use* only. Just use `onclose`.
 
-In some cases we want to execute multiple methods in a single transaction (see {@link external:caf_ca}). If one fails, we roll back both state changes and (delayed) external interactions for all of them.
+### Multi-method
+
+In some cases we want to execute multiple methods in a single transaction (see {@link external:caf_ca}). If one fails, we roll back all state changes and (delayed) external interactions.
 
 This is easy in CAF.js, because methods that do not provide a callback are assumed to be multi-method calls:
 
@@ -100,6 +104,8 @@ s.onopen = function() {
 ...
 ```
 
+### Notifications
+
 In other cases, the CA will send notifications to one (or many) client(s). See
 {@link external:caf_session}. Notifications are processed in the `onmessage` handler:
 
@@ -113,5 +119,7 @@ s.onmessage = function(msg) {
 ```
 
 See `examples/helloworld` for full code examples.
+
+### Other
 
 Session objects also provide end-to-end encryption and time synchronization. See {@link module:caf_cli/cryptoSession} and {@link module:caf_cli/TimeAdjuster}.
