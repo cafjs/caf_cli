@@ -1,18 +1,18 @@
 {
     "name": "caf_cli",
     "description": "Cloud Assistants browser and node.js client library for interacting with CAs",
-    "version": "0.2.42",
+    "version": "0.3.0",
     "author": "Antonio Lain <antlai@cafjs.com>",
     "dependencies": {
-        "caf_transport" : "^0.2.0",
+        "caf_transport" : "^0.3.0",
         "ws" : "^1.0.1"
     },
     "devDependencies": {
         "eslint": "^3.1.1",
-        "caf_core" : "^0.2.0",
+        "caf_core" : "^0.3.0",
         "nodeunit" : ">=0.9",
-        "browserify" : "^8.0.0",
-        "uglify-js" : "^2.4.0",
+        "browserify" : "^13.3.0",
+        "uglify-es": "^3.3.8",
         "jsdoc": "^3.4.2"
     },
     "browser": {
@@ -26,7 +26,7 @@
         "eslintfix" : "./node_modules/.bin/eslint --fix .",
         "build-js" : "browserify -r ./index.js:caf_cli -d -o public/caf_cli.js",
         "build-min-js" : "browserify -r ./index.js:caf_cli | uglifyjs > public/caf_cli.min.js",
-        "build": "mkdir -p public; npm run build-js && npm run build-min-js",
+        "build": "mkdir -p public; yarn run build-js && yarn run build-min-js",
         "docs" : "rm -fr docs; mkdir -p docs; ./node_modules/.bin/jsdoc --pedantic -c ./conf.json -d docs lib/*.js --readme ./README.md --package ./package.json"
     },
     "repository": {
