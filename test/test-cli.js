@@ -47,38 +47,81 @@ module.exports = {
         test.expect(8);
         var s;
         async.waterfall([
-                            function(cb) {
-                                s = new cli.Session('ws://root-test.vcap.me:3000',
-                                                    'antonio-c1');
-                                s.onopen = function() {
-                                    test.throws(function() {
-                                                    s.helllllooo('foo',cb);
-                                                }, Error, 'bad method name');
-                                    test.throws(function() {
-                                                    s.hello('foo','bar', cb);
-                                                }, Error, 'bad # args');
-                                    s.hello('foo', cb);
-                                };
-                            },
-                            function(res, cb) {
-                                test.equals(res, 'Bye:foo');
-                                var old = s.changeSessionId('newSession');
-                                test.equals(old, 'default');
-                                old = s.changeSessionId('newSession');
-                                test.equals(old, 'newSession');
-                                s.onclose = function(err) {
-                                    test.ok(!err);
-                                    test.ok(s.isClosed());
-                                    cb(null, null);
-                                };
-                                s.close();
-                            }
-                     ], function(err, res) {
-                         test.ifError(err);
+            function(cb) {
+                s = new cli.Session('ws://root-test.vcap.me:3000',
+                                    'antonio-c1');
+                s.onopen = function() {
+                    test.throws(function() {
+                        s.helllllooo('foo',cb);
+                    }, Error, 'bad method name');
+                    test.throws(function() {
+                        s.hello('foo','bar', cb);
+                    }, Error, 'bad # args');
+                    s.hello('foo', cb);
+                };
+            },
+            function(res, cb) {
+                test.equals(res, 'Bye:foo');
+                var old = s.changeSessionId('newSession');
+                test.equals(old, 'default');
+                old = s.changeSessionId('newSession');
+                test.equals(old, 'newSession');
+                s.onclose = function(err) {
+                    test.ok(!err);
+                    test.ok(s.isClosed());
+                    cb(null, null);
+                };
+                s.close();
+            }
+        ], function(err, res) {
+            test.ifError(err);
 
-                         test.done();
-                     });
+            test.done();
+        });
     },
+
+    helloPromise: function(test) {
+        var self = this;
+        test.expect(8);
+        var s;
+        async.waterfall([
+            function(cb) {
+                s = new cli.Session('ws://root-test.vcap.me:3000',
+                                    'antonio-c1');
+                s.onopen = async function() {
+                    try {
+                        await s.helllllooo('foo').getPromise();
+                    } catch (e) {
+                        test.ok(e instanceof TypeError);
+                    }
+                    try {
+                        await s.hello('foo','bar').getPromise();
+                    } catch (e) {
+                        test.ok(e instanceof Error);
+                    }
+                    var res = await s.hello('foo').getPromise();
+                    cb(null, res);
+                };
+            },
+            function(res, cb) {
+                test.equals(res, 'Bye:foo');
+                var old = s.changeSessionId('newSession');
+                test.equals(old, 'default');
+                old = s.changeSessionId('newSession');
+                test.equals(old, 'newSession');
+                s.onclose = function(err) {
+                    test.ok(!err);
+                    test.ok(s.isClosed());
+                    cb(null, null);
+                };
+                s.close();
+            }
+        ], function(err, res) {
+            test.ifError(err);
+            test.done();
+        });
+    },
+
     helloMulti: function(test) {
         var self = this;
         test.expect(8);
@@ -108,7 +151,7 @@ module.exports = {
             },
             function(res, cb) {
                 test.equals(res, 'foo');
-                 s.hello('foo0')
+                s.hello('foo0')
                     .helloDelayException('foo1')
                     .hello('foo2', function(err) {
                         test.ok(false); // never reached
@@ -138,6 +181,70 @@ module.exports = {
             test.done();
         });
     },
+
+    helloMultiAsync: function(test) {
+        var self = this;
+        test.expect(8);
+        var s;
+        async.waterfall([
+            function(cb) {
+                s = new cli.Session('ws://root-test.vcap.me:3000',
+                                    'antonio-c1');
+                s.onopen = async function() {
+                    var res = await s.hello('foo')
+                            .hello('foo1')
+                            .hello('foo2')
+                            .hello('foo7')
+                            .hello('foo')
+                            .getLastMessage()
+                            .getPromise();
+                    cb(null, res);
+                };
+            },
+            async function(res, cb) {
+                test.equals(res, 'foo');
+                try {
+                    await s.hello('foo0')
+                        .helloFail('foo1')
+                        .hello('foo2')
+                        .getPromise();
+                } catch (e) {
+                     test.ok(e.msg === 'helloFail');
+                    // nothing changed
+                    var result = await s.getLastMessage().getPromise();
+                    cb(null, result);
+                }
+            },
+            async function(res, cb) {
+                test.equals(res, 'foo');
+                s.onclose = function(err) {
+                    test.ok(err);
+                    s = new cli.Session('ws://root-test.vcap.me:3000',
+                                        'antonio-c1');
+                    s.onopen = async function() {
+                        cb(null, await s.getLastMessage().getPromise());
+                    };
+                };
+                var result = await s.hello('foo0')
+                        .helloDelayException('foo1')
+                        .hello('foo2')
+                        .getPromise();
+            },
+            function(res, cb) {
+                test.equals(res, 'foo');
+                s.onclose = function(err) {
+                    test.ok(!err);
+                    test.ok(s.isClosed());
+                    cb(null, null);
+                };
+                s.close();
+            }
+        ], function(err, res) {
+            test.ifError(err);
+            test.done();
+        });
+    },
+
     helloAdjustTime : function(test) {
         var self = this;
         test.expect(4);
@@ -148,7 +255,7 @@ module.exports = {
                                     'antonio-c2');
                 s.onopen = function() {
                     async.timesSeries(20, function(n, cb0) {
-                         s.hello('foo', cb0);
+                        s.hello('foo', cb0);
                     }, cb);
                 };
             }
@@ -171,96 +278,96 @@ module.exports = {
         test.expect(5);
         var s;
         async.waterfall([
-                            function(cb) {
-                                s = new cli.Session('ws://root-test.vcap.me:3000',
-                                                    'antonio-c3');
-                                s.onopen = function() {
-                                    var cb0 = function(err, val) {
-                                        test.ok(err);
-                                        test.ok(err.stack);
-                                        test.equals(err.msg,
-                                                    'helloFail');
-                                        cb(null, null);
-                                    };
-                                    s.helloFail('foo', cb0);
-                                };
-                            },
-                            function(res, cb) {
-                                s.onclose = function(err) {
-                                    test.ok(!err);
-                                    cb(null, null);
-                                };
-                                s.close();
-                            }
-                        ], function(err, res) {
-                            test.ifError(err);
-                            test.done();
-                        });
+            function(cb) {
+                s = new cli.Session('ws://root-test.vcap.me:3000',
+                                    'antonio-c3');
+                s.onopen = function() {
+                    var cb0 = function(err, val) {
+                        test.ok(err);
+                        test.ok(err.stack);
+                        test.equals(err.msg,
+                                    'helloFail');
+                        cb(null, null);
+                    };
+                    s.helloFail('foo', cb0);
+                };
+            },
+            function(res, cb) {
+                s.onclose = function(err) {
+                    test.ok(!err);
+                    cb(null, null);
+                };
+                s.close();
+            }
+        ], function(err, res) {
+            test.ifError(err);
+            test.done();
+        });
     },
     helloException: function(test) {
         var self = this;
         test.expect(11);
         var s;
         async.series([
-                         function(cb) {
-                             s = new cli.Session('ws://root-test.vcap.me:3000',
-                                                 'antonio-c4');
-                             s.onopen = function() {
-                                 var cb0 = function(err, val) {
-                                     console.log('ERROR: This should never' +
-                                                 'execute');
-                                     // add an extra test to fail test count
-                                     test.ok(err);
-                                     cb('Error: response instead of close');
-                                 };
-                                 s.helloException('foo', cb0);
-                             };
-                             s.onclose = function(err) {
-                                 test.ok(err);
-                                 test.ok(json_rpc.isSystemError(err));
-                                 test.equal(json_rpc
-                                                .getSystemErrorCode(err),
-                                            json_rpc.ERROR_CODES
-                                            .exceptionThrown);
-                                 var error = json_rpc
-                                     .getSystemErrorData(err);
-                                 test.equal(error.msg, 'helloException');
-                                 test.ok(error.stack);
-                                 cb(null,null);
-                             };
-                         },
-                         function(cb) {
-                             s = new cli.Session('ws://root-test.vcap.me:3000',
-                                                 'antonio-c4');
-                             s.onopen = function() {
-                                 var cb0 = function(err, val) {
-                                     console.log('ERROR: This should never' +
-                                                 'execute');
-                                     // add an extra test to fail test count
-                                     test.ok(err);
-                                     cb('Error: response instead of close');
-                                 };
-                                 s.helloDelayException('foo', cb0);
-                             };
-                             s.onclose = function(err) {
-                                 test.ok(err);
-                                 test.ok(json_rpc.isSystemError(err));
-                                 test.equal(json_rpc
-                                            .getSystemErrorCode(err),
-                                            json_rpc.ERROR_CODES
-                                            .exceptionThrown);
-                                 var error = json_rpc
-                                     .getSystemErrorData(err);
-                                 test.equal(error.msg,
-                                            'helloDelayException');
-                                 test.ok(error.stack);
-                                 cb(null,null);
-                             };
-                         }
-                        ], function(err, res) {
-                            test.ifError(err);
-                            test.done();
-                        });
+            function(cb) {
+                s = new cli.Session('ws://root-test.vcap.me:3000',
+                                    'antonio-c4');
+                s.onopen = function() {
+                    var cb0 = function(err, val) {
+                        console.log('ERROR: This should never' +
+                                    'execute');
+                        // add an extra test to fail test count
+                        test.ok(err);
+                        cb('Error: response instead of close');
+                    };
+                    s.helloException('foo', cb0);
+                };
+                s.onclose = function(err) {
+                    test.ok(err);
+                    test.ok(json_rpc.isSystemError(err));
+                    test.equal(json_rpc
+                               .getSystemErrorCode(err),
+                               json_rpc.ERROR_CODES
+                               .exceptionThrown);
+                    var error = json_rpc
+                            .getSystemErrorData(err);
+                    test.equal(error.msg, 'helloException');
+                    test.ok(error.stack);
+                    cb(null,null);
+                };
+            },
+            function(cb) {
+                s = new cli.Session('ws://root-test.vcap.me:3000',
+                                    'antonio-c4');
+                s.onopen = function() {
+                    var cb0 = function(err, val) {
+                        console.log('ERROR: This should never' +
+                                    'execute');
+                        // add an extra test to fail test count
+                        test.ok(err);
+                        cb('Error: response instead of close');
+                    };
+                    s.helloDelayException('foo', cb0);
+                };
+                s.onclose = function(err) {
+                    test.ok(err);
+                    test.ok(json_rpc.isSystemError(err));
+                    test.equal(json_rpc
+                               .getSystemErrorCode(err),
+                               json_rpc.ERROR_CODES
+                               .exceptionThrown);
+                    var error = json_rpc
+                            .getSystemErrorData(err);
+                    test.equal(error.msg,
+                               'helloDelayException');
+                    test.ok(error.stack);
+                    cb(null,null);
+                };
+            }
+        ], function(err, res) {
+            test.ifError(err);
+            test.done();
+        });
     },
 
     helloRetry: function(test) {
@@ -284,72 +391,72 @@ module.exports = {
                      });
         };
         async.series([
-                         function(cb) {
-                             s = new cli.Session('ws://root-test.vcap.me:3000',
-                                                 'antonio-c9',
-                                                {
-                                                    timeoutMsec : 12000
-                                                });
-                             s.onopen = function() {
-                                 s.hello('foo', cb);
-                             };
-                         },
-                         function(cb) {
-                             self.$.top.__ca_graceful_shutdown__(null, cb);
-                         },
-                         function(cb) {
-                             async.parallel([
-                                                sendHello,
-                                                sendHello,
-                                                sendHello,
-                                                sendHello,
-                                                sendHello,
-                                                function(cb0) {
-                                                    var f = function() {
-                                                        var n = s.numPending();
-                                                        test.equals(n, 6);
-                                                        restart(cb0);
-                                                    };
-                                                    setTimeout(f, 5000);
-                                                }
-                                            ], cb);
-                         },
-                         function(cb) {
-                             self.$.top.__ca_graceful_shutdown__(null, cb);
-                         },
-                         function(cb) {
-                             s.onclose = function(err) {
-                                 test.ok(err && err.timeout);
-                                 console.log(err);
-                                 cb(null);
-                             };
-                         },
-                         restart,
-                         function(cb) {
-                             s = new cli.Session('ws://root-test.vcap.me:3000',
-                                                 'antonio-c9',
-                                                 {
-                                                     maxRetries : 5
-                                                 });
-                             s.onopen = function() {
-                                 self.$.top.__ca_graceful_shutdown__(null, cb);
-                             };
-                         },
-                         function(cb) {
-                             s.onclose = function(err) {
-                                 test.ok(err && err.maxRetriesExceeded);
-                                 console.log(err);
-                                 cb(null);
-                             };
-                             s.hello('foo2', function(err, data) {
-                                         console.log('never called');
-                                     });
-                         },
-                         restart
-                     ], function(err, res) {
-                         test.ifError(err);
-                         test.done();
-                     });
+            function(cb) {
+                s = new cli.Session('ws://root-test.vcap.me:3000',
+                                    'antonio-c9',
+                                    {
+                                        timeoutMsec : 12000
+                                    });
+                s.onopen = function() {
+                    s.hello('foo', cb);
+                };
+            },
+            function(cb) {
+                self.$.top.__ca_graceful_shutdown__(null, cb);
+            },
+            function(cb) {
+                async.parallel([
+                    sendHello,
+                    sendHello,
+                    sendHello,
+                    sendHello,
+                    sendHello,
+                    function(cb0) {
+                        var f = function() {
+                            var n = s.numPending();
+                            test.equals(n, 6);
+                            restart(cb0);
+                        };
+                        setTimeout(f, 5000);
+                    }
+                ], cb);
+            },
+            function(cb) {
+                self.$.top.__ca_graceful_shutdown__(null, cb);
+            },
+            function(cb) {
+                s.onclose = function(err) {
+                    test.ok(err && err.timeout);
+                    console.log(err);
+                    cb(null);
+                };
+            },
+            restart,
+            function(cb) {
+                s = new cli.Session('ws://root-test.vcap.me:3000',
+                                    'antonio-c9',
+                                    {
+                                        maxRetries : 5
+                                    });
+                s.onopen = function() {
+                    self.$.top.__ca_graceful_shutdown__(null, cb);
+                };
+            },
+            function(cb) {
+                s.onclose = function(err) {
+                    test.ok(err && err.maxRetriesExceeded);
+                    console.log(err);
+                    cb(null);
+                };
+                s.hello('foo2', function(err, data) {
+                    console.log('never called');
+                });
+            },
+            restart
+        ], function(err, res) {
+            test.ifError(err);
+            test.done();
+        });
     },
     helloNotify: function(test) {
         var self = this;
@@ -363,36 +470,36 @@ module.exports = {
             s.helloNotify('foo2', cb0);
         };
         async.series([
-                         function(cb) {
-                             s = new cli.Session('ws://root-test.vcap.me:3000',
-                                                 'antonio-c5');
-                             s.onopen = function() {
-                                 sendHelloNotify(cb);
-                             };
-                         },
-                         function(cb) {
-                             s.onmessage = function(msg) {
-                                 test.ok(json_rpc.isNotification(msg));
-                                 var data = json_rpc.getMethodArgs(msg);
-                                 test.deepEqual(data[0], 'helloNotify:foo2');
-                                 cb(null);
-                             };
-                         },
-                         function(cb) {
-                             setTimeout(function() { cb(null);}, 10000);
-//                             s.hello('foo2', cb);
-                         },
-                         function(cb) {
-                             s.onclose = function(err) {
-                                 test.ok(!err);
-                                 cb(null, null);
-                             };
-                             s.close();
-                         }
-                     ], function(err, res) {
-                         test.ifError(err);
-                         test.done();
-                     });
+            function(cb) {
+                s = new cli.Session('ws://root-test.vcap.me:3000',
+                                    'antonio-c5');
+                s.onopen = function() {
+                    sendHelloNotify(cb);
+                };
+            },
+            function(cb) {
+                s.onmessage = function(msg) {
+                    test.ok(json_rpc.isNotification(msg));
+                    var data = json_rpc.getMethodArgs(msg);
+                    test.deepEqual(data[0], 'helloNotify:foo2');
+                    cb(null);
+                };
+            },
+            function(cb) {
+                setTimeout(function() { cb(null);}, 10000);
+                //                             s.hello('foo2', cb);
+            },
+            function(cb) {
+                s.onclose = function(err) {
+                    test.ok(!err);
+                    cb(null, null);
+                };
+                s.close();
+            }
+        ], function(err, res) {
+            test.ifError(err);
+            test.done();
+        });
     },
     recoverableException: function(test) {
         var self = this;
@@ -408,80 +515,80 @@ module.exports = {
         };
 
         async.series([
-                         function(cb) {
-                             s = new cli.Session('ws://root-test.vcap.me:3000',
-                                                 'antonio-c6');
-                             s.onopen = function() {
-                                 sendFailPrepareAlt(cb);
-                             };
-                         },
-                         function(cb) {
-                             s.onclose = function(err) {
-                                 test.ok(!err);
-                                 cb(null, null);
-                             };
-                             s.close();
-                         }
-                     ], function(err, res) {
-                         test.ifError(err);
-                         test.done();
-                     });
+            function(cb) {
+                s = new cli.Session('ws://root-test.vcap.me:3000',
+                                    'antonio-c6');
+                s.onopen = function() {
+                    sendFailPrepareAlt(cb);
+                };
+            },
+            function(cb) {
+                s.onclose = function(err) {
+                    test.ok(!err);
+                    cb(null, null);
+                };
+                s.close();
+            }
+        ], function(err, res) {
+            test.ifError(err);
+            test.done();
+        });
     },
     diffie: function(test) {
         var self = this;
         var s1, s2;
         test.expect(6);
-                async.series([
-                    function(cb) {
-                        s1 = new cli.Session('ws://root-test.vcap.me:3000',
-                                             'antonio-c16');
-                        s1.onopen = function() {
-                            cb(null);;
-                        };
-                    },
-                    function(cb) {
-                        s2 = new cli.Session('ws://root-test.vcap.me:3000',
-                                                 'antonio-c26');
-                        s2.onopen = function() {
-                            cb(null);;
-                        };
-                    },
-                    function(cb) {
-                        var c1 = s1.getCrypto();
-                        var c2 = s2.getCrypto();
-                        c2.setOtherPublicKey(c1.getPublicKey());
-                        c1.setOtherPublicKey(c2.getPublicKey());
-                        var m1 = c1.encryptAndMAC('Hello');
-                        var m2 = c2.authAndDecrypt(m1);
-                        test.equal(m2, 'Hello');
-                        m1 = c2.encryptAndMAC('Goodbye');
-                        m2 = c1.authAndDecrypt(m1);
-                        test.equal(m2, 'Goodbye');
-                        m1 = m1.slice(0, m1.length -2);
-                        test.throws(function() {
-                            // bad MAC
-                            m2 = c1.authAndDecrypt(m1);
-                        });
-                        cb(null);
-                    },
-                    function(cb) {
-                        s1.onclose = function(err) {
-                            test.ok(!err);
-                            cb(null, null);
-                        };
-                        s1.close();
-                    },
-                    function(cb) {
-                        s2.onclose = function(err) {
-                            test.ok(!err);
-                            cb(null, null);
-                        };
-                        s2.close();
-                    }
-                ], function(err, res) {
-                    test.ifError(err);
-                    test.done();
+        async.series([
+            function(cb) {
+                s1 = new cli.Session('ws://root-test.vcap.me:3000',
+                                     'antonio-c16');
+                s1.onopen = function() {
+                    cb(null);;
+                };
+            },
+            function(cb) {
+                s2 = new cli.Session('ws://root-test.vcap.me:3000',
+                                     'antonio-c26');
+                s2.onopen = function() {
+                    cb(null);;
+                };
+            },
+            function(cb) {
+                var c1 = s1.getCrypto();
+                var c2 = s2.getCrypto();
+                c2.setOtherPublicKey(c1.getPublicKey());
+                c1.setOtherPublicKey(c2.getPublicKey());
+                var m1 = c1.encryptAndMAC('Hello');
+                var m2 = c2.authAndDecrypt(m1);
+                test.equal(m2, 'Hello');
+                m1 = c2.encryptAndMAC('Goodbye');
+                m2 = c1.authAndDecrypt(m1);
+                test.equal(m2, 'Goodbye');
+                m1 = m1.slice(0, m1.length -2);
+                test.throws(function() {
+                    // bad MAC
+                    m2 = c1.authAndDecrypt(m1);
                 });
+                cb(null);
+            },
+            function(cb) {
+                s1.onclose = function(err) {
+                    test.ok(!err);
+                    cb(null, null);
+                };
+                s1.close();
+            },
+            function(cb) {
+                s2.onclose = function(err) {
+                    test.ok(!err);
+                    cb(null, null);
+                };
+                s2.close();
+            }
+        ], function(err, res) {
+            test.ifError(err);
+            test.done();
+        });
 
     }
 };

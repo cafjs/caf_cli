@@ -2,7 +2,8 @@ module.exports = {
     "extends": "eslint:recommended",
     "env" : {
         "browser": true,
-        "node": true
+        "node": true,
+        "es6": true
     },
     "rules": {
         // enable additional rules, mostly with auto fix...
