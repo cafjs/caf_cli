@@ -15,15 +15,14 @@ var URL = 'http://root-hello.vcap.me:3000/#from=foo-ca1&ca=foo-ca1';
 
 var s = new caf_cli.Session(URL);
 
-s.onopen = function() {
-    s.increment().decrement(function(err, counter) {
-        if (err) {
-            console.log(myUtils.errToPrettyStr(err));
-        } else {
-            console.log('Final count:' + counter);
-            s.close();
-        }
-    });
+s.onopen = async function() {
+    try {
+        var counter = await s.increment().decrement().getPromise();
+        console.log('Final count:' + counter);
+        s.close();
+    } catch (err) {
+        s.close(err);
+    }
 };
 
 s.onclose = function(err) {

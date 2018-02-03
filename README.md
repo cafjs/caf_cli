@@ -8,7 +8,6 @@ See http://www.cafjs.com
 [![Build Status](http://ci.cafjs.com/api/badges/cafjs/caf_cli/status.svg)](http://ci.cafjs.com/cafjs/caf_cli)
 
 
-
 This repository contains a client CAF library for browser (using `browserify` and native websockets), cloud, scripting, and gadget (`node.js`).
 
 The base interface is very similar to a websocket, but CAF dynamically adds remote invocation methods with local argument checking.
@@ -17,17 +16,17 @@ For example, with the CA:
 
 ```
 exports.methods = {
-    __ca_init__: function(cb) {
+    async __ca_init__() {
         this.state.counter = 0;
-        cb(null);
+        return [];
     },
-    increment: function(cb) {
+    async increment() {
         this.state.counter = this.state.counter + 1;
-        cb(null, this.state.counter);
+        return [null, this.state.counter];
     },
-    decrement: function(cb) {
+    async decrement() {
         this.state.counter = this.state.counter - 1;
-        cb(null, this.state.counter);
+        return [null, this.state.counter];
     }
 };
 ```
@@ -36,28 +35,18 @@ and the client code:
 
 ```
 var URL = 'http://root-hello.vcap.me:3000/#from=foo-ca1&ca=foo-ca1';
-
 var s = new caf_cli.Session(URL);
-
-s.onopen = function() {
-    async.waterfall([
-        function(cb) {
-            s.increment(cb);
-        },
-        function(counter, cb) {
-            console.log(counter);
-            s.decrement(cb);
-        }
-    ], function(err, counter) {
-        if (err) {
-            console.log(myUtils.errToPrettyStr(err));
-        } else {
-            console.log('Final count:' + counter);
-            s.close();
-        }
-    });
-};
-
+s.onopen = async function() {
+    try {
+        var counter = await s.increment().getPromise();
+        console.log(counter);
+        counter = await s.decrement().getPromise();
+        console.log('Final count:' + counter);
+        s.close();
+    } catch (ex) {
+        s.close(ex);
+    }
+}
 s.onclose = function(err) {
     if (err) {
         console.log(myUtils.errToPrettyStr(err));
@@ -75,11 +64,11 @@ Remote invocations are always serialized. The session locally buffers new reques
 
 There are two types of errors:
 
-* Application error: propagated in the callback, no attempt to recover it.
+* Application error: propagated in the callback or exception in `await`, no attempt to recover it.
 
 * System error: after all the attempts to recover fail, the error is propagated in the `onclose` handler. The session is no longer usable.
 
-Calling the `onclose` with no argument means the session closed normally, i.e., using its `close()` method.
+Triggering the `onclose` with no argument means the session closed normally, i.e., using its `close()` method.
 
 Note that the `onerror` handler in the websocket interface is for *internal use* only. Just use `onclose`.
 
@@ -91,16 +80,15 @@ This is easy in CAF.js, because methods that do not provide a callback are assum
 
 ```
 ...
-s.onopen = function() {
-    s.increment().decrement(function(err, counter) {
-        if (err) {
-            console.log(myUtils.errToPrettyStr(err));
-        } else {
-            console.log('Final count:' + counter);
-            s.close();
-        }
-    });
-};
+s.onopen = async function() {
+    try {
+        var counter = await s.increment().decrement().getPromise();
+        console.log('Final count:' + counter);
+        s.close();
+    } catch (err) {
+        s.close(err);
+    }
+}
 ...
 ```
 
