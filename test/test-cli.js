@@ -323,14 +323,14 @@ module.exports = {
                     s.helloException('foo', cb0);
                 };
                 s.onclose = function(err) {
-                    test.ok(err);
-                    test.ok(json_rpc.isSystemError(err));
+                    test.ok(err && err.msg);
+                    test.ok(json_rpc.isSystemError(err.msg));
                     test.equal(json_rpc
-                               .getSystemErrorCode(err),
+                               .getSystemErrorCode(err.msg),
                                json_rpc.ERROR_CODES
                                .exceptionThrown);
                     var error = json_rpc
-                            .getSystemErrorData(err);
+                            .getSystemErrorData(err.msg);
                     test.equal(error.msg, 'helloException');
                     test.ok(error.stack);
                     cb(null,null);
@@ -350,14 +350,14 @@ module.exports = {
                     s.helloDelayException('foo', cb0);
                 };
                 s.onclose = function(err) {
-                    test.ok(err);
-                    test.ok(json_rpc.isSystemError(err));
+                    test.ok(err && err.msg);
+                    test.ok(json_rpc.isSystemError(err.msg));
                     test.equal(json_rpc
-                               .getSystemErrorCode(err),
+                               .getSystemErrorCode(err.msg),
                                json_rpc.ERROR_CODES
                                .exceptionThrown);
                     var error = json_rpc
-                            .getSystemErrorData(err);
+                            .getSystemErrorData(err.msg);
                     test.equal(error.msg,
                                'helloDelayException');
                     test.ok(error.stack);
