@@ -13,8 +13,8 @@
         "nodeunit" : ">=0.9",
         "browserify" : "^13.3.0",
         "uglify-es": "^3.3.8",
-        "typescript": "2.8.X",
-        "@types/node": "^9.4.0",
+        "typescript": "3.7.3",
+        "@types/node": "^12.12.21",
         "@types/ws": "^4.0.0",
         "jsdoc": "^3.4.2"
     },
