@@ -1,29 +1,29 @@
 'use strict';
 
-var caf = require('caf_core');
+const caf = require('caf_core');
 
 exports.methods = {
-    __ca_init__: function(cb) {
+    async __ca_init__() {
         this.state.counter = 42;
         this.$.session.limitQueue(1, 'default');
-        cb(null);
+        return [];
     },
-    __ca_pulse__: function(cb) {
+    async __ca_pulse__() {
         this.$.session.notify([this.state.counter]);
-        cb(null);
+        return [];
     },
-    increment: function(cb) {
+    async increment() {
         this.$.log && this.$.log.debug('Increment');
         this.state.counter = this.state.counter + 1;
-        cb(null, this.state.counter);
+        return [null, this.state.counter];
     },
-    decrement: function(cb) {
+    async decrement() {
         this.$.log && this.$.log.debug('Decrement');
         this.state.counter = this.state.counter - 1;
-        cb(null, this.state.counter);
+        return [null, this.state.counter];
     },
-    getCounter: function(cb) {
-        cb(null, this.state.counter);
+    async getCounter() {
+        return [null, this.state.counter];
     }
 };
 

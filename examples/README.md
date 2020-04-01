@@ -2,9 +2,9 @@
 
 First install `devDependencies`. In top `caf_ca/` dir:
 
-    npm install
+    yarn install
 
-Second, run locally a `redis-server` instance at the default port 6379 with no password. In ubuntu:
+Second, run locally a `redis-server` instance at the default port 6379 with no password. In Ubuntu:
 
     apt-get install redis-server
 
