@@ -6,7 +6,7 @@ See https://www.cafjs.com
 
 ## Client Library
 
-[![Build Status](https://travis-ci.org/cafjs/caf_cli.svg?branch=master)](https://travis-ci.org/cafjs/caf_cli)
+[![Build Status](https://github.com/cafjs/caf_cli/actions/workflows/push.yml/badge.svg)](https://github.com/cafjs/caf_cli/actions/workflows/push.yml)
 
 This repository contains a `Caf.js` client library for browser (using `browserify` and native websockets), cloud, scripting, and gadget (`node.js`).
 
