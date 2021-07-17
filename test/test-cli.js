@@ -80,6 +80,45 @@ module.exports = {
         });
     },
 
+    helloMaxQueue: function(test) {
+        var self = this;
+        test.expect(6);
+        var s;
+        async.waterfall([
+            function(cb) {
+                s = new cli.Session('ws://root-test.vcap.me:3000',
+                                    'antonio-c1', {maxQueueLength: 1,
+                                                   disableBackchannel: true});
+                s.onopen = async function() {
+                    const p1 = s.hello('foo1').getPromise();
+                    const p2 = s.hello('foo2').getPromise();
+                    const p3 = s.hello('foo3').getPromise();
+                    try {
+                        const res = await p2;
+                        test.ok(false, `ERROR2 got ${res}`);
+                    } catch (err) {
+                        test.ok(err.maxQueueLength);
+                    }
+                    const res = await p1;
+                    test.equals(res, 'Bye:foo1');
+                    cb(null, await p3);
+                };
+            },
+            function(res, cb) {
+                test.equals(res, 'Bye:foo3');
+                s.onclose = function(err) {
+                    test.ok(!err);
+                    test.ok(s.isClosed());
+                    cb(null, null);
+                };
+                s.close();
+            }
+        ], function(err, res) {
+            test.ifError(err);
+            test.done();
+        });
+    },
+
     helloPromise: function(test) {
         var self = this;
         test.expect(8);
@@ -591,4 +630,5 @@ module.exports = {
         });
 
     }
+
 };

@@ -60,6 +60,8 @@ The methods `increment` and `decrement` magically appear in `s` after we open th
 
 Remote invocations are always serialized, i.e., the session object locally buffers new requests until the previous ones have been processed. The session properties can be configured in the URL, or in an extra constructor argument. See {@link module:caf_cli/Session} for details.
 
+We can set a maximum queue size for non-started requests with the option `maxQueueLength`. If exceeded, the oldest request gets dequeued, and an application error, with the attribute  `maxQueueLength` set to `true`, will propagate in the callback of the discarded request. The goal is to apply backpressure to slow down the client.
+
 ### Errors
 
 There are two types of errors:
@@ -71,6 +73,7 @@ There are two types of errors:
 Triggering the `onclose` with no argument means the session closed normally, i.e., using its `close()` method.
 
 Note that the `onerror` handler in the websocket interface is for *internal use* only. Just use `onclose`.
+
 
 ### Multi-method
 
