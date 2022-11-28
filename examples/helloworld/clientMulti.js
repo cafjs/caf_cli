@@ -11,7 +11,7 @@ const caf_cli = caf_core.caf_cli;
  *
  *  With security on, we would need a token to authenticate `from`.
  */
-const URL = 'http://root-hello.vcap.me:3000/#from=foo-ca1&ca=foo-ca1';
+const URL = 'http://root-hello.localtest.me:3000/#from=foo-ca1&ca=foo-ca1';
 
 const s = new caf_cli.Session(URL);
 

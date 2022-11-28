@@ -34,7 +34,7 @@ exports.methods = {
 and the client code:
 
 ```
-var URL = 'http://root-hello.vcap.me:3000/#from=foo-ca1&ca=foo-ca1';
+var URL = 'http://root-hello.localtest.me:3000/#from=foo-ca1&ca=foo-ca1';
 var s = new caf_cli.Session(URL);
 s.onopen = async () => {
     try {

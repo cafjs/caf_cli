@@ -1,6 +1,6 @@
 var cli = require('../../index.js');
 var CA_NAME = process.env['CA_NAME'] || 'antonio-c2';
-var WS_URL = process.env['WS_URL'] || 'ws://foo.vcap.me';
+var WS_URL = process.env['WS_URL'] || 'ws://foo.localtest.me';
 console.log('ca: '+ CA_NAME + ' ' + WS_URL);
 var s = new cli.Session(WS_URL, CA_NAME);
 var MAX_HELLOS = 100;

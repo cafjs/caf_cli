@@ -8,7 +8,7 @@ var hello = require('./hello/main.js');
 
 var app = hello;
 
-var HOST='root-test.vcap.me';
+var HOST='root-test.localtest.me';
 var PORT=3000;
 
 process.on('uncaughtException', function (err) {
@@ -48,7 +48,7 @@ module.exports = {
         var s;
         async.waterfall([
             function(cb) {
-                s = new cli.Session('ws://root-test.vcap.me:3000',
+                s = new cli.Session('ws://root-test.localtest.me:3000',
                                     'antonio-c1');
                 s.onopen = function() {
                     test.throws(function() {
@@ -86,7 +86,7 @@ module.exports = {
         var s;
         async.waterfall([
             function(cb) {
-                s = new cli.Session('ws://root-test.vcap.me:3000',
+                s = new cli.Session('ws://root-test.localtest.me:3000',
                                     'antonio-c1', {maxQueueLength: 1,
                                                    disableBackchannel: true});
                 s.onopen = async function() {
@@ -125,7 +125,7 @@ module.exports = {
         var s;
         async.waterfall([
             function(cb) {
-                s = new cli.Session('ws://root-test.vcap.me:3000',
+                s = new cli.Session('ws://root-test.localtest.me:3000',
                                     'antonio-c1');
                 s.onopen = async function() {
                     try {
@@ -167,7 +167,7 @@ module.exports = {
         var s;
         async.waterfall([
             function(cb) {
-                s = new cli.Session('ws://root-test.vcap.me:3000',
+                s = new cli.Session('ws://root-test.localtest.me:3000',
                                     'antonio-c1');
                 s.onopen = function() {
                     s.hello('foo')
@@ -199,7 +199,7 @@ module.exports = {
                     });
                 s.onclose = function(err) {
                     test.ok(err);
-                    s = new cli.Session('ws://root-test.vcap.me:3000',
+                    s = new cli.Session('ws://root-test.localtest.me:3000',
                                         'antonio-c1');
                     s.onopen = function() {
                         s.getLastMessage(cb);
@@ -227,7 +227,7 @@ module.exports = {
         var s;
         async.waterfall([
             function(cb) {
-                s = new cli.Session('ws://root-test.vcap.me:3000',
+                s = new cli.Session('ws://root-test.localtest.me:3000',
                                     'antonio-c1');
                 s.onopen = async function() {
                     var res = await s.hello('foo')
@@ -258,7 +258,7 @@ module.exports = {
                 test.equals(res, 'foo');
                 s.onclose = function(err) {
                     test.ok(err);
-                    s = new cli.Session('ws://root-test.vcap.me:3000',
+                    s = new cli.Session('ws://root-test.localtest.me:3000',
                                         'antonio-c1');
                     s.onopen = async function() {
                         cb(null, await s.getLastMessage().getPromise());
@@ -290,7 +290,7 @@ module.exports = {
         var s;
         async.series([
             function(cb) {
-                s = new cli.Session('ws://root-test.vcap.me:3000',
+                s = new cli.Session('ws://root-test.localtest.me:3000',
                                     'antonio-c2');
                 s.onopen = function() {
                     async.timesSeries(20, function(n, cb0) {
@@ -318,7 +318,7 @@ module.exports = {
         var s;
         async.waterfall([
             function(cb) {
-                s = new cli.Session('ws://root-test.vcap.me:3000',
+                s = new cli.Session('ws://root-test.localtest.me:3000',
                                     'antonio-c3');
                 s.onopen = function() {
                     var cb0 = function(err, val) {
@@ -349,7 +349,7 @@ module.exports = {
         var s;
         async.series([
             function(cb) {
-                s = new cli.Session('ws://root-test.vcap.me:3000',
+                s = new cli.Session('ws://root-test.localtest.me:3000',
                                     'antonio-c4');
                 s.onopen = function() {
                     var cb0 = function(err, val) {
@@ -376,7 +376,7 @@ module.exports = {
                 };
             },
             function(cb) {
-                s = new cli.Session('ws://root-test.vcap.me:3000',
+                s = new cli.Session('ws://root-test.localtest.me:3000',
                                     'antonio-c4');
                 s.onopen = function() {
                     var cb0 = function(err, val) {
@@ -431,7 +431,7 @@ module.exports = {
         };
         async.series([
             function(cb) {
-                s = new cli.Session('ws://root-test.vcap.me:3000',
+                s = new cli.Session('ws://root-test.localtest.me:3000',
                                     'antonio-c9',
                                     {
                                         timeoutMsec : 12000
@@ -472,7 +472,7 @@ module.exports = {
             },
             restart,
             function(cb) {
-                s = new cli.Session('ws://root-test.vcap.me:3000',
+                s = new cli.Session('ws://root-test.localtest.me:3000',
                                     'antonio-c9',
                                     {
                                         maxRetries : 5
@@ -510,7 +510,7 @@ module.exports = {
         };
         async.series([
             function(cb) {
-                s = new cli.Session('ws://root-test.vcap.me:3000',
+                s = new cli.Session('ws://root-test.localtest.me:3000',
                                     'antonio-c5');
                 s.onopen = function() {
                     sendHelloNotify(cb);
@@ -555,7 +555,7 @@ module.exports = {
 
         async.series([
             function(cb) {
-                s = new cli.Session('ws://root-test.vcap.me:3000',
+                s = new cli.Session('ws://root-test.localtest.me:3000',
                                     'antonio-c6');
                 s.onopen = function() {
                     sendFailPrepareAlt(cb);
@@ -579,14 +579,14 @@ module.exports = {
         test.expect(6);
         async.series([
             function(cb) {
-                s1 = new cli.Session('ws://root-test.vcap.me:3000',
+                s1 = new cli.Session('ws://root-test.localtest.me:3000',
                                      'antonio-c16');
                 s1.onopen = function() {
                     cb(null);;
                 };
             },
             function(cb) {
-                s2 = new cli.Session('ws://root-test.vcap.me:3000',
+                s2 = new cli.Session('ws://root-test.localtest.me:3000',
                                      'antonio-c26');
                 s2.onopen = function() {
                     cb(null);;
